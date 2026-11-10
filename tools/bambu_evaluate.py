@@ -64,8 +64,8 @@ def preservation(source, output):
             'selected_process_keys_unchanged': list(SETTINGS)}
 
 
-def limits():
-    resource.setrlimit(resource.RLIMIT_FSIZE, (CAP, CAP))
+def limits(file_bytes):
+    resource.setrlimit(resource.RLIMIT_FSIZE, (file_bytes, file_bytes))
     resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
 
 
@@ -95,12 +95,16 @@ def main():
         cmd = [args.node, '--max-old-space-size=1536', str(ROOT / 'plugins/cli/support-fins.js'),
                str(source), '--preserve-project', '--disable-native-supports', '--json',
                '-o', str(output), *CASES[name]]
+        used = sum(p.stat().st_size for p in args.output.rglob('*') if p.is_file())
+        remaining = CAP - used - 1024 * 1024  # Reserve bounded logs and report metadata.
+        if remaining <= 0:
+            raise RuntimeError('no space remains within the comparison retention bound')
         before = resource.getrusage(resource.RUSAGE_CHILDREN)
         start = time.monotonic()
         row = {'case': name, 'sliced': False, 'ready_to_print': False}
         try:
             run = subprocess.run(cmd, capture_output=True, text=True, timeout=125,
-                                 preexec_fn=limits, start_new_session=True)
+                                 preexec_fn=lambda: limits(remaining), start_new_session=True)
             row.update(exit_code=run.returncode, elapsed_seconds=time.monotonic() - start)
             (args.output / (name + '.log')).write_text((run.stderr + run.stdout)[-65536:])
             if run.returncode:

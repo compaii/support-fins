@@ -150,8 +150,11 @@ export { SCHEMA as OPTIONS_SCHEMA };
  *              'pad'; ranges are [first, end) TRIANGLE indices into `triangles`. Every
  *              triangle belongs to exactly one piece. ids are stable for the same part
  *              and options, not across edits.
- *   overFaces  indices of the INPUT faces in the overhang regions the engine supports:
- *              the site paints these red (web/ui/part.js paintOverhangs, res.kept)
+ *   overFaces  indices of INPUT faces retained by overhang analysis (candidate regions):
+ *              the site paints these red (web/ui/part.js paintOverhangs, res.kept).
+ *              These are NOT a certificate that generated fins support every face.
+ *              In particular, unserved regions may still contribute faces here.
+ *              Never turn this list directly into slicer support-blocker painting.
  *   smallFaces faces past the threshold in area-based slivers or recognised
  *              small-hole ceilings left for bridging, painted amber on the site
  *              after generation: a host should show them too, not hide them

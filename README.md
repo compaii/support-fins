@@ -1,3 +1,5 @@
+> Fork workflow: [bounded Bambu evaluation and Rust decision](docs/BAMBU-WORKFLOW.md). Hybrid support painting is not implemented or qualified yet.
+
 # Support Fins
 
 **Tip a part on edge, and Support Fins adds the breakaway support fins that make that
